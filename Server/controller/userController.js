@@ -5,6 +5,8 @@ import appointmentModel from '../models/appointmentModel.js'
 import doctorsModel from '../models/doctorsModel.js'
 import jwt from 'jsonwebtoken'
 import { v2 as cloudinary } from 'cloudinary';
+import razorpay from 'razorpay'
+
 const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -129,20 +131,18 @@ const updateProfile = async (req, res) => {
 };
 const bookAppointment = async (req, res) => {
     try {
-        const { userId, docId, slotDate, slotTime } = req.body;
+        const { docId, slotDate, slotTime } = req.body;
+        const userId = req.user.id;
 
-        // Validate required fields
         if (!userId || !docId || !slotDate || !slotTime) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
         }
 
-        // Fetch doctor data
         const docData = await doctorsModel.findById(docId).select("-password");
         if (!docData || !docData.available) {
             return res.status(404).json({ success: false, message: "Doctor not available" });
         }
 
-        // Check and update slots availability
         let slots_booked = docData.slots_booked || {};
         if (slots_booked[slotDate]?.includes(slotTime)) {
             return res.status(400).json({ success: false, message: "Slot already booked" });
@@ -153,13 +153,11 @@ const bookAppointment = async (req, res) => {
         }
         slots_booked[slotDate].push(slotTime);
 
-        // Fetch user data
         const userData = await userModel.findById(userId).select("-password");
         if (!userData) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // Prepare appointment data
         const appointmentData = {
             userId,
             doctorId: docId,
@@ -171,10 +169,9 @@ const bookAppointment = async (req, res) => {
             cancelled: false,
             payment: false,
             isCompleted: false,
-            date: Date.now(), // Current timestamp for appointment creation
+            date: Date.now(),
         };
 
-        // Save appointment and update doctor slots
         const newAppointment = new appointmentModel(appointmentData);
         await newAppointment.save();
         await doctorsModel.findByIdAndUpdate(docId, { slots_booked });
@@ -185,5 +182,49 @@ const bookAppointment = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal Server Error", error: error.message });
     }
 };
+const appointmentList = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const appointments = await appointmentModel.find({ userId })
+        res.json({ success: true, appointments });
+    }
+    catch(error){
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+}
+const cancelAppointment = async (req, res) => {
+    try {
+        const { appointmentId } = req.body;
+        const userId = req.user.id;
 
-export {register,userLogin,getProfile,updateProfile,bookAppointment}
+        if (!appointmentId) {
+            return res.status(400).json({ success: false, message: "Missing required fields" });
+        }
+
+        const appointment = await appointmentModel.findById(appointmentId);
+        if (!appointment) {
+            return res.status(404).json({ success: false, message: "Appointment not found" });
+        }
+        if (appointment.cancelled) {
+            return res.status(400).json({ success: false, message: "Appointment already cancelled" });
+        }
+        if (appointment.userId !== userId) {
+            return res.status(403).json({ success: false, message: "Unauthorized" });
+        }
+        await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true });
+        res.json({ success: true, message: "Appointment cancelled successfully" });
+
+        const { doctorId, slotDate, slotTime } = appointment;
+        const docData = await doctorsModel.findById(doctorId).select("-password");
+
+        let slots_booked = docData.slots_booked || {};
+        slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime);
+        await doctorsModel.findByIdAndUpdate(doctorId, { slots_booked });
+
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+
+
+export {register,userLogin,getProfile,updateProfile,bookAppointment,appointmentList,cancelAppointment}
