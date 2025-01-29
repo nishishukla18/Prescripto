@@ -1,4 +1,3 @@
-
 import jwt from "jsonwebtoken";
 
 const authAdmin = async (req, res, next) => {
@@ -23,4 +22,3 @@ const authAdmin = async (req, res, next) => {
 };
 
 export { authAdmin };
-

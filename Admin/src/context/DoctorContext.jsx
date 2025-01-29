@@ -1,15 +1,28 @@
-import { createContext } from "react";
+import { createContext, useState, useEffect } from "react";
 
+export const DoctorContext = createContext();
 
-export const DoctorContext = createContext()
-const DoctorContextProvider = (props)=>{
-    const value = {
+const DoctorContextProvider = ({ children }) => {
+  const [dToken, setDtoken] = useState(localStorage.getItem("dToken") || "");
 
+  useEffect(() => {
+    if (dToken) {
+      localStorage.setItem("dToken", dToken);
+    } else if (localStorage.getItem("dToken")) {
+      localStorage.removeItem("dToken");
     }
-    return(
-        <DoctorContext.Provider>
-            {props.children}
-        </DoctorContext.Provider>
-    )
-}
-export default DoctorContextProvider
+  }, [dToken]);
+
+  const value = {
+    dToken,
+    setDtoken,
+  };
+
+  return (
+    <DoctorContext.Provider value={value}>
+      {children}
+    </DoctorContext.Provider>
+  );
+};
+
+export default DoctorContextProvider;

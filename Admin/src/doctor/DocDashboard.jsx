@@ -1,14 +1,14 @@
 import React, { useContext } from "react";
-import { AdminContext } from "../context/AdminContext";
+import { DoctorContext } from "../context/DoctorContext";
 import { NavLink, Outlet } from "react-router-dom";
 import { assets } from "../assets/assets";
 
-function Dashboard() {
-  const { setAtoken } = useContext(AdminContext);
+function DocDashboard() {
+  const { setDtoken } = useContext(DoctorContext);
 
   const handleLogout = () => {
-    localStorage.removeItem("aToken");
-    setAtoken("");
+    localStorage.removeItem("dToken");
+    setDtoken("");
     alert("Logged out successfully!");
   };
 
@@ -17,18 +17,31 @@ function Dashboard() {
       <div className="w-64 bg-white text-black flex flex-col space-y-4 p-4">
         <div className="flex items-center space-x-4">
           <img
-            src={assets.admin_logo}
-            alt="Admin Logo"
+            src={assets.doc_icon}
+            alt="Doctor Logo"
             className="h-16 object-contain"
           />
           <h1 className="text-lg font-semibold text-black">
-            Admin Dashboard
+            Doctor Dashboard
           </h1>
         </div>
         <ul className="space-y-4">
           <li>
             <NavLink
-              to="all-appointments"
+              to="profile"
+              className={({ isActive }) =>
+                `flex items-center space-x-3 p-3 rounded ${
+                  isActive ? "bg-blue-500 text-white" : "hover:bg-blue-500"
+                }`
+              }
+            >
+              <img src={assets.profile_icon} alt="Profile Icon" className="w-6 h-6" />
+              <p>Profile</p>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="appointments"
               className={({ isActive }) =>
                 `flex items-center space-x-3 p-3 rounded ${
                   isActive ? "bg-blue-500 text-white" : "hover:bg-blue-500"
@@ -37,45 +50,6 @@ function Dashboard() {
             >
               <img src={assets.appointment_icon} alt="Appointments Icon" className="w-6 h-6" />
               <p>Appointments</p>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="add-doctor"
-              className={({ isActive }) =>
-                `flex items-center space-x-3 p-3 rounded ${
-                  isActive ? "bg-blue-500 text-white" : "hover:bg-blue-500"
-                }`
-              }
-            >
-              <img src={assets.add_icon} alt="Add Doctor Icon" className="w-6 h-6" />
-              <p>Add Doctor</p>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="doctors-list"
-              className={({ isActive }) =>
-                `flex items-center space-x-3 p-3 rounded ${
-                  isActive ? "bg-blue-500 text-white" : "hover:bg-blue-500"
-                }`
-              }
-            >
-              <img src={assets.people_icon} alt="Doctors List Icon" className="w-6 h-6" />
-              <p>Doctors List</p>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="interface"
-              className={({ isActive }) =>
-                `flex items-center space-x-3 p-3 rounded ${
-                  isActive ? "bg-blue-500 text-white" : "hover:bg-blue-500"
-                }`
-              }
-            >
-              <img src={assets.appointment_icon} alt="Interface Icon" className="w-6 h-6" />
-              <p>Interface</p>
             </NavLink>
           </li>
         </ul>
@@ -91,7 +65,7 @@ function Dashboard() {
         <nav className="bg-white shadow-lg">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <h1 className="text-lg font-semibold text-gray-800">
-              Admin Dashboard
+              Doctor Dashboard
             </h1>
           </div>
         </nav>
@@ -110,4 +84,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default DocDashboard;

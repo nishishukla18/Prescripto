@@ -1,16 +1,16 @@
 import jwt from "jsonwebtoken";
 
-const authUser = async (req, res, next) => {
+const authDoc = async (req, res, next) => {
     try {
         // Extract the token from the 'token' header
-        const token = req.headers.token;
+        const dtoken = req.headers.token;
 
-        if (!token) {
+        if (!dtoken) {
             return res.status(401).json({ success: false, message: "Authorization token missing" });
         }
 
         // Verify and decode the token
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        const decodedToken = jwt.verify(dtoken, process.env.JWT_SECRET);
 
         // Attach user ID to the request object
         req.user = { id: decodedToken.id };
@@ -22,6 +22,6 @@ const authUser = async (req, res, next) => {
     }
 };
 
-export { authUser };
+export { authDoc };
 
 
