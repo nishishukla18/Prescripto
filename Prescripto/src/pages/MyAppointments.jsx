@@ -88,11 +88,9 @@ function MyAppointments() {
                 <div className="mt-2">
                   <p className="text-sm font-medium">Address:</p>
                   <p className="text-sm text-gray-600">
-                    {appointment.docData.address?.line1 || "Address Line 1"}
+                    {appointment.docData.address}
                   </p>
-                  <p className="text-sm text-gray-600">
-                    {appointment.docData.address?.line2 || "Address Line 2"}
-                  </p>
+                 
                 </div>
                 <p className="mt-2 text-sm">
                   <span className="font-medium">Date & Time:</span> {appointment.slotDate} at {appointment.slotTime}
@@ -103,7 +101,7 @@ function MyAppointments() {
               {/* Action Buttons */}
               <div className="mt-4 sm:mt-0 sm:ml-6 flex flex-col space-y-2">
                {!appointment.cancelled && (
-                  <button
+                  <button onClick={alert("Payment gateway not implemented")}
                     className="px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-blue-500 hover:text-white"
                   >
                     Pay
